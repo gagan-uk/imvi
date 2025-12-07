@@ -22,15 +22,32 @@ int main(void){
   Texture current{LoadTextureFromImage(image)};
   UnloadImage(image);
 
-  int imageX{(GetScreenWidth() - current.width) / 2 };
-  int imageY{(GetScreenHeight() - current.height) / 2};
-
-
 
   while (!WindowShouldClose()){
 
+    float screenX {(float)GetScreenWidth()/current.width};
+    float screenY{(float)GetScreenHeight()/current.height};
+    float scale{};
+
+    if (screenX   >  screenY){ scale = screenX;}
+    else{scale = screenY;}
+
+    // scaling
+    float newWidth {current.width * scale};
+    float newHeight { current.height * scale};
+    
+    // centering the image
+    int imageX ((GetScreenWidth() - newWidth) / 2);
+    int imageY ((GetScreenHeight() - newHeight) / 2);
+
+
     BeginDrawing();
-      DrawTexture(current,imageX,imageY,WHITE);      
+    ClearBackground(RAYWHITE);
+    DrawTextureEx(current,
+      (Vector2){(float)imageX,(float)imageY} ,
+      0,scale,
+      WHITE);
+
     EndDrawing();
 
   };
