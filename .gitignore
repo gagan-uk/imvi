@@ -1,5 +1,6 @@
 #binary op
-*.out
+
+imvi
 
 #testing stuff
 test.jpg
