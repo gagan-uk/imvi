@@ -1,14 +1,15 @@
 #include "raylib.h"
+#include "zoom.h"
 
 int main(void){
   //window variables 
   const int screenW {900};
   const int screenH {600};
-  const int screenFont {20};
   const char* windowTitle {"ImvI"};
-  const char* iconPath{"ico.png"};
+  const char* iconPath{"images/ico.png"};
   
   InitWindow(screenW, screenH, windowTitle);
+  InitZoom(); // sets zoom to 1
   SetWindowState(FLAG_WINDOW_RESIZABLE);
   SetWindowMinSize(400,400);
   
@@ -18,23 +19,26 @@ int main(void){
   UnloadImage(icon);
 
   // image renderer
-  Image image{LoadImage("test.jpg")};
+  Image image{LoadImage("images/test.jpg")};
   Texture current{LoadTextureFromImage(image)};
   UnloadImage(image);
 
 
   while (!WindowShouldClose()){
+    //functions
+    UpdateZoom();
 
     float screenX {(float)GetScreenWidth()/current.width};
     float screenY{(float)GetScreenHeight()/current.height};
     float scale{};
 
-    if (screenX   >  screenY){ scale = screenX;}
+    if (screenX < screenY){ scale = screenX;}
     else{scale = screenY;}
 
     // scaling
-    float newWidth {current.width * scale};
-    float newHeight { current.height * scale};
+    float finalScale {scale*GetZoomLevel()};
+    float newWidth {current.width * finalScale};
+    float newHeight { current.height * finalScale};
     
     // centering the image
     int imageX ((GetScreenWidth() - newWidth) / 2);
@@ -42,16 +46,16 @@ int main(void){
 
 
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(BLACK);
     DrawTextureEx(current,
       (Vector2){(float)imageX,(float)imageY} ,
-      0,scale,
+      0,finalScale,
       WHITE);
 
     EndDrawing();
 
   };
-  
+  UnloadTexture(current);
   CloseWindow();
   return 0;
 }
