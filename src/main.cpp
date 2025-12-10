@@ -1,10 +1,9 @@
 #include "raylib.h"
-#include "zoom.h"
 #include <cstring>
+#include "zoom.h"
+#include "directory.h"
 
-
-
-
+//// Prgm loop //////
 int main(void){
   //window variables 
   const int screenW {900};
@@ -21,21 +20,26 @@ int main(void){
   SetWindowIcon(icon);
   UnloadImage(icon);
 
-  //directory handler
-  char directory[512]= {0};
-  const char* workingDir { GetWorkingDirectory()};
-  strncpy(directory,workingDir,sizeof(directory)-1);
-  FilePathList currentDir {LoadDirectoryFilesEx(directory,".png;.jpg;.jpeg;.webp;.bmp",false)};
-  if (currentDir.count == 0)
-  {
-    TraceLog(LOG_ERROR,"No Image found / Unsupported file type");
-    CloseWindow(); 
-    return -1;
-  };
-  TraceLog(LOG_INFO, "Found %d image files", currentDir.count); 
-
-
-  Image image {LoadImage(currentDir.paths[0])};
+  ///////////////directory handler ///////////////
+  FilePathList currentDir = LoadImageFiles(GetWorkingDirectory());
+  
+  if (GetImageCount(currentDir) == 0) {
+      TraceLog(LOG_ERROR, "No Image found / Unsupported file type");
+      CloseWindow(); 
+      return -1;
+  }
+  
+  TraceLog(LOG_INFO, "Found %d image files", GetImageCount(currentDir)); 
+  
+  // loading first image in directory
+  Image image = LoadImage(GetImagePath(currentDir, 0));
+  
+  if (image.data == NULL) {
+      TraceLog(LOG_ERROR, "Failed to load image: %s", GetImagePath(currentDir, 0));
+      UnloadImageFiles(currentDir);
+      CloseWindow();
+      return -1;
+  }
 
   // image renderer
   
