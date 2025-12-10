@@ -1,5 +1,9 @@
 #include "raylib.h"
 #include "zoom.h"
+#include <cstring>
+
+
+
 
 int main(void){
   //window variables 
@@ -12,14 +16,29 @@ int main(void){
   InitZoom(); // sets zoom to 1
   SetWindowState(FLAG_WINDOW_RESIZABLE);
   SetWindowMinSize(400,400);
-  
-  
+    
   Image icon {LoadImage(iconPath)};
   SetWindowIcon(icon);
   UnloadImage(icon);
 
+  //directory handler
+  char directory[512]= {0};
+  const char* workingDir { GetWorkingDirectory()};
+  strncpy(directory,workingDir,sizeof(directory)-1);
+  FilePathList currentDir {LoadDirectoryFilesEx(directory,".png;.jpg;.jpeg;.webp;.bmp",false)};
+  if (currentDir.count == 0)
+  {
+    TraceLog(LOG_ERROR,"No Image found / Unsupported file type");
+    CloseWindow(); 
+    return -1;
+  };
+  TraceLog(LOG_INFO, "Found %d image files", currentDir.count); 
+
+
+  Image image {LoadImage(currentDir.paths[0])};
+
   // image renderer
-  Image image{LoadImage("images/test.jpg")};
+  
   Texture current{LoadTextureFromImage(image)};
   UnloadImage(image);
 
@@ -56,6 +75,7 @@ int main(void){
 
   };
   UnloadTexture(current);
+  UnloadDirectoryFiles(currentDir);
   CloseWindow();
   return 0;
 }
