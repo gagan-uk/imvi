@@ -9,8 +9,16 @@ int main(void){
   const int screenW {900};
   const int screenH {600};
   const char* windowTitle {"ImvI"};
-  const char* iconPath{"images/ico.png"};
   
+  const char* iconPath;
+  if (FileExists("/usr/share/imvi/ico.png")) 
+  {
+    iconPath = "/usr/share/imvi/ico.png";  // System installation
+  } else
+  {
+    iconPath = "images/ico.png";           // Development/local
+  }
+
   InitWindow(screenW, screenH, windowTitle);
   InitZoom(); // sets zoom to 1
   SetWindowState(FLAG_WINDOW_RESIZABLE);
@@ -30,7 +38,10 @@ int main(void){
   }
   
   TraceLog(LOG_INFO, "Found %d image files", GetImageCount(currentDir)); 
-  
+  int currentIndex{0};
+
+
+
   // loading first image in directory
   Image image = LoadImage(GetImagePath(currentDir, 0));
   
@@ -41,15 +52,17 @@ int main(void){
       return -1;
   }
 
-  // image renderer
+  // texture renderer
   
   Texture current{LoadTextureFromImage(image)};
   UnloadImage(image);
+  SetTextureFilter(current, TEXTURE_FILTER_ANISOTROPIC_16X);
 
 
   while (!WindowShouldClose()){
     //functions
     UpdateZoom();
+    bool updateImage = false; //checks arrow key state
 
     float screenX {(float)GetScreenWidth()/current.width};
     float screenY{(float)GetScreenHeight()/current.height};
@@ -67,6 +80,33 @@ int main(void){
     int imageX ((GetScreenWidth() - newWidth) / 2);
     int imageY ((GetScreenHeight() - newHeight) / 2);
 
+//////////////////////////navigation//////////////////////////////////
+    if (IsKeyPressed(KEY_RIGHT))
+    {
+      currentIndex = GetNextImage(currentIndex,GetImageCount(currentDir),true);
+      updateImage = true;
+    }
+    if (IsKeyPressed(KEY_LEFT))
+    {
+      currentIndex = GetNextImage(currentIndex,GetImageCount(currentDir),false);
+      updateImage = true;
+    }
+
+     // loads the next image
+      if (updateImage) {
+          UnloadTexture(current);
+          ResetZoom(); 
+          
+      Image newImage = LoadImage(GetImagePath(currentDir, currentIndex));
+        
+      if (newImage.data != NULL) {
+              current = LoadTextureFromImage(newImage);
+              UnloadImage(newImage);
+              SetTextureFilter(current, TEXTURE_FILTER_ANISOTROPIC_16X);
+              TraceLog(LOG_INFO, "Loaded: %s", GetImagePath(currentDir, currentIndex));
+          }
+      }
+///////////////////////////////////////////////////////////////////////////
 
     BeginDrawing();
     ClearBackground(BLACK);
@@ -78,6 +118,7 @@ int main(void){
     EndDrawing();
 
   };
+  /// unloading memory
   UnloadTexture(current);
   UnloadDirectoryFiles(currentDir);
   CloseWindow();
