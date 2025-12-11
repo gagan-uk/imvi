@@ -15,8 +15,23 @@ int GetImageCount(FilePathList fileList) {
 }
 
 const char* GetImagePath(FilePathList fileList, int index) {
-    if (index >= 0 && index < fileList.count) {
+    if (index >= 0 && index < (int)fileList.count) {
         return fileList.paths[index];
     }
     return NULL;
+}
+
+int GetNextImage(int currentIndex, int totalImages, bool next)
+{
+    if(next) ///sets to first image
+    {
+        currentIndex++;
+        if (currentIndex >= totalImages) currentIndex = 0; 
+    }   
+    else ///sets to last image
+    {
+        currentIndex--;
+        if(currentIndex < 0) currentIndex = -1;
+    }
+    return currentIndex;
 }
