@@ -31,7 +31,7 @@ int GetNextImage(int currentIndex, int totalImages, bool next)
     else ///sets to last image
     {
         currentIndex--;
-        if(currentIndex < 0) currentIndex = -1;
+        if(currentIndex < 0) currentIndex = totalImages-1;
     }
     return currentIndex;
 }
