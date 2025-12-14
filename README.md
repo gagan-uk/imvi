@@ -11,9 +11,10 @@ on your machine.
 Clone the repo:
 ```
 git clone https://github.com/gagan-uk/imvi.git
+cd imvi
 ```
 
-After cloning the repo,open it and build the files by:
+build the files by:
 ```
 make install 
 ```
